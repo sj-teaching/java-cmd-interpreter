@@ -40,37 +40,23 @@ public class ParseTreeImpl implements ParseTree {
 	}
 
 	@Override
-	public NodeType getNodeType() {
-		return tree.get(cursor).type;
+	public void setAlt(int alt) {
+		tree.get(cursor).alt = alt;
 	}
 
 	@Override
-	public int getChildCount() {
-		return tree.get(cursor).children.size();
-	}
-
-	@Override
-	public boolean hasParent() {
-		return tree.get(cursor).parent >= 0;
-	}
-
-	@Override
-	public void moveToParent() {
-		// Node parent = tree.get(tree.get(cursor).parent);
-		cursor = tree.get(cursor).parent;
-	}
-
-	@Override
-	public void moveToChild(int index) {
-		cursor = tree.get(cursor).children.get(index);
-	}
-
-	@Override
-	public String getIdString() {
-		assert this.getNodeType() == NodeType.valueOf("ID") : "Cursor must be an ID node";
-
-		// TODO handle ST?
-		return tree.get(cursor).name;
+	public int getValue() {
+		assert this.getNodeType() == NodeType.valueOf("ID")
+				|| this.getNodeType() == NodeType.valueOf("INT") : "Cursor must be an ID node";
+	
+		int val = Integer.MIN_VALUE;
+		if (this.getNodeType() == NodeType.valueOf("INT")) {
+			val = tree.get(cursor).value;
+		} else {
+			String id = this.getIdString();
+			val = st.get(id);
+		}
+		return val;
 	}
 
 	@Override
@@ -86,23 +72,8 @@ public class ParseTreeImpl implements ParseTree {
 	}
 
 	@Override
-	public int getValue() {
-		assert this.getNodeType() == NodeType.valueOf("ID")
-				|| this.getNodeType() == NodeType.valueOf("INT") : "Cursor must be an ID node";
-
-		int val = Integer.MIN_VALUE;
-		if (this.getNodeType() == NodeType.valueOf("INT")) {
-			val = tree.get(cursor).value;
-		} else {
-			String id = this.getIdString();
-			val = st.get(id);
-		}
-		return val;
-	}
-
-	@Override
-	public void setAlt(int alt) {
-		tree.get(cursor).alt = alt;
+	public NodeType getNodeType() {
+		return tree.get(cursor).type;
 	}
 
 	@Override
@@ -111,20 +82,49 @@ public class ParseTreeImpl implements ParseTree {
 	}
 
 	@Override
-	public void addChild() {
-		Node temp = new Node();
-		temp.parent = cursor;
-		tree.get(cursor).children.add(tree.size());
-
-		tree.add(temp);
+	public String getIdString() {
+		assert this.getNodeType() == NodeType.valueOf("ID") : "Cursor must be an ID node";
+	
+		// TODO handle ST?
+		return tree.get(cursor).name;
 	}
 
 	@Override
 	public void setIdString(String id) {
 		tree.get(cursor).name = id;
-
+	
 		if (!st.containsKey(id)) {
 			st.put(id, Integer.MIN_VALUE);
 		}
+	}
+
+	@Override
+	public void addChild() {
+		Node temp = new Node();
+		temp.parent = cursor;
+		tree.get(cursor).children.add(tree.size());
+	
+		tree.add(temp);
+	}
+
+	@Override
+	public void moveToChild(int index) {
+		cursor = tree.get(cursor).children.get(index);
+	}
+
+	@Override
+	public void moveToParent() {
+		// Node parent = tree.get(tree.get(cursor).parent);
+		cursor = tree.get(cursor).parent;
+	}
+
+	@Override
+	public int getChildCount() {
+		return tree.get(cursor).children.size();
+	}
+
+	@Override
+	public boolean hasParent() {
+		return tree.get(cursor).parent >= 0;
 	}
 }
