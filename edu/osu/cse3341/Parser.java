@@ -36,7 +36,8 @@ public class Parser {
 				|| (!exptok.equals("INT") && !exptok.equals("ID") && !exptok.equals("~EOF~")
 						&& !exptok.equals(actual))) {
 			Helper.log.info("Syntax Error! Expected: " + exptok + ", found: " + actual);
-			throw new UnexpectedTokenException("Syntax Error! Expected: " + exptok + ", found: " + actual);
+			throw new UnexpectedTokenException(
+					"Syntax Error: [Line " + t.currentTokenLine() + "] Expected: " + exptok + ", found: " + actual);
 		}
 		t.nextToken();
 		Helper.log.info("Consumed: " + actual);
@@ -96,7 +97,8 @@ public class Parser {
 			pt.moveToParent();
 			matchConsume(")");
 		} else {
-			throw new UnexpectedTokenException("Unexpected token " + tok + " while parsing <fac>.");
+			throw new UnexpectedTokenException(
+					"[Line " + t.currentTokenLine() + "] Unexpected token " + tok + " while parsing <fac>.");
 		}
 	}
 
@@ -369,7 +371,8 @@ public class Parser {
 			pt.moveToParent();
 			pt.setAlt(5);
 		} else {
-			throw new UnexpectedTokenException("Unexpected token " + tok + " while parsing <stmt>");
+			throw new UnexpectedTokenException(
+					"[Line " + t.currentTokenLine() + "] Unexpected token " + tok + " while parsing <stmt>");
 		}
 
 	}
