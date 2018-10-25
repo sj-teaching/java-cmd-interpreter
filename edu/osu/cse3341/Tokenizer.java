@@ -2,8 +2,9 @@ package edu.osu.cse3341;
 
 public interface Tokenizer {
 	public enum TokenType {
-		PROGRAM, BEGIN, END, INT, IF, THEN, ELSE, WHILE, LOOP, READ, WRITE, AND, OR, SEMICOL, COMMA, ASSIGN, NOT,
-		LBRACK, RBRACK, LPAREN, RPAREN, PLUS, MINUS, STAR, NEQ, EQ, GEQ, LEQ, GT, LT, NUM, ID, EOF;
+		PROGRAM, BEGIN, END, INT, IF, THEN, ELSE, WHILE, LOOP, READ, WRITE, //
+		AND, OR, SEMICOL, COMMA, ASSIGN, NOT, LBRACK, RBRACK, LPAREN, RPAREN, //
+		PLUS, MINUS, STAR, NEQ, EQ, GEQ, LEQ, GT, LT, NUM, ID, EOF;
 	}
 
 	/**
@@ -34,7 +35,7 @@ public interface Tokenizer {
 	 *
 	 * @requires [A file exists at {@code filepath}]
 	 * @param filepath The path of the file to tokenize
-	 * @throws InvalidTokenException 
+	 * @throws InvalidTokenException
 	 */
 	void tokenize(String filepath) throws InvalidTokenException;
 
@@ -53,4 +54,8 @@ public interface Tokenizer {
 	 * @return String representation of the {@code tokenStream}
 	 */
 	String getTokenStream();
+
+	int currentTokenLine();
+
+	TokenType currentTokenType();
 }

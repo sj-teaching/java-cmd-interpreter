@@ -19,7 +19,7 @@ public class TokenizerImpl implements Tokenizer {
 	/**
 	 * The token stream to be generated.
 	 */
-	private List<String> tokenStream;
+	private List<Token> tokenStream;
 
 	/**
 	 * Index of the current token in the {@code tokenStream}.
@@ -65,7 +65,7 @@ public class TokenizerImpl implements Tokenizer {
 
 	@Override
 	public String currentToken() {
-		return tokenStream.get(currentIndex);
+		return tokenStream.get(currentIndex).getName();
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class TokenizerImpl implements Tokenizer {
 						raiseError("Invalid reserved word " + tok);
 					}
 
-					tokenStream.add(tok);
+					tokenStream.add(new Token(tok, lineNum));
 
 				} else if (Character.isUpperCase(current)) {
 					// See if it's an identifier
@@ -144,7 +144,7 @@ public class TokenizerImpl implements Tokenizer {
 					if (!tok.matches("[A-Z][A-Z]*[0-9]*") || tok.length() > 8) {
 						raiseError("Invalid identifier " + tok);
 					}
-					tokenStream.add(tok);
+					tokenStream.add(new Token(tok, lineNum));
 
 				} else if (Character.isDigit(current)) {
 					// See if it's a number
@@ -158,42 +158,42 @@ public class TokenizerImpl implements Tokenizer {
 					if (!tok.matches("[0-9][0-9]*") || tok.length() > 8) {
 						raiseError("Invalid numeric constant " + tok);
 					}
-					tokenStream.add(tok);
+					tokenStream.add(new Token(tok, lineNum));
 				} else {
 					if (current == '!') {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
-							tokenStream.add("!=");
+							tokenStream.add(new Token("!=", lineNum));
 							current = nextChar(inputStream);
 						} else {
-							tokenStream.add("!");
+							tokenStream.add(new Token("!", lineNum));
 							current = next;
 						}
 					} else if (current == '>') {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
-							tokenStream.add(">=");
+							tokenStream.add(new Token(">=", lineNum));
 							current = nextChar(inputStream);
 						} else {
-							tokenStream.add(">");
+							tokenStream.add(new Token(">", lineNum));
 							current = next;
 						}
 					} else if (current == '<') {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
-							tokenStream.add("<=");
+							tokenStream.add(new Token("<=", lineNum));
 							current = nextChar(inputStream);
 						} else {
-							tokenStream.add("<");
+							tokenStream.add(new Token("<", lineNum));
 							current = next;
 						}
 					} else if (current == '=') {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
-							tokenStream.add("==");
+							tokenStream.add(new Token("==", lineNum));
 							current = nextChar(inputStream);
 						} else {
-							tokenStream.add("=");
+							tokenStream.add(new Token("=", lineNum));
 							current = next;
 						}
 					} else {
@@ -201,7 +201,7 @@ public class TokenizerImpl implements Tokenizer {
 						if (tokens.indexOf(tok) < 0) {
 							raiseError("Invalid symbols " + tok);
 						}
-						tokenStream.add(tok);
+						tokenStream.add(new Token(tok, lineNum));
 						current = nextChar(inputStream);
 					}
 				}
@@ -215,12 +215,12 @@ public class TokenizerImpl implements Tokenizer {
 			e.printStackTrace();
 		} finally {
 			// add the special ~EOF~ symbol at the end
-			tokenStream.add("~EOF~");
+			tokenStream.add(new Token("~EOF~", lineNum));
 		}
 	}
 
 	private void raiseError(String msg) throws InvalidTokenException {
-		String excMsg="Invalid Token: [Line " + lineNum + "] " + msg;
+		String excMsg = "Invalid Token: [Line " + lineNum + "] " + msg;
 		Helper.log.info(excMsg);
 		throw new InvalidTokenException(excMsg);
 	}
@@ -241,5 +241,15 @@ public class TokenizerImpl implements Tokenizer {
 	@Override
 	public String getTokenStream() {
 		return tokenStream.toString();
+	}
+
+	@Override
+	public int currentTokenLine() {
+		return this.tokenStream.get(currentIndex).getLine();
+	}
+
+	@Override
+	public TokenType currentTokenType() {
+		return this.tokenStream.get(currentIndex).getType();
 	}
 }
