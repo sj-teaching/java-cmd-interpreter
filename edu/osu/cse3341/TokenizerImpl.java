@@ -101,7 +101,7 @@ public class TokenizerImpl implements Tokenizer {
 	}
 
 	@Override
-	public void tokenize(String filePath) {
+	public void tokenize(String filePath) throws InvalidTokenException {
 		FileReader inputStream;
 		Set<Character> whiteSpaces = new HashSet<>(Arrays.asList(' ', '\t', '\r'));
 
@@ -159,12 +159,12 @@ public class TokenizerImpl implements Tokenizer {
 						raiseError("Invalid numeric constant " + tok);
 					}
 					tokenStream.add(tok);
-
 				} else {
 					if (current == '!') {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
 							tokenStream.add("!=");
+							current = nextChar(inputStream);
 						} else {
 							tokenStream.add("!");
 							current = next;
@@ -173,6 +173,7 @@ public class TokenizerImpl implements Tokenizer {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
 							tokenStream.add(">=");
+							current = nextChar(inputStream);
 						} else {
 							tokenStream.add(">");
 							current = next;
@@ -181,6 +182,7 @@ public class TokenizerImpl implements Tokenizer {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
 							tokenStream.add("<=");
+							current = nextChar(inputStream);
 						} else {
 							tokenStream.add("<");
 							current = next;
@@ -189,6 +191,7 @@ public class TokenizerImpl implements Tokenizer {
 						Character next = nextChar(inputStream);
 						if (next == '=') {
 							tokenStream.add("==");
+							current = nextChar(inputStream);
 						} else {
 							tokenStream.add("=");
 							current = next;
@@ -216,9 +219,10 @@ public class TokenizerImpl implements Tokenizer {
 		}
 	}
 
-	private void raiseError(String msg) {
-		Helper.log.severe("Error: [Line " + lineNum + "] " + msg);
-		System.exit(1);
+	private void raiseError(String msg) throws InvalidTokenException {
+		String excMsg="Invalid Token: [Line " + lineNum + "] " + msg;
+		Helper.log.info(excMsg);
+		throw new InvalidTokenException(excMsg);
 	}
 
 	private Character nextChar(FileReader inputStream) {

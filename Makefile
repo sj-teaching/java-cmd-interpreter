@@ -8,17 +8,17 @@ PKG = edu/osu/cse3341
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-CLASSES = $(PKG)/Tokenizer.java $(PKG)/TokenizerImpl.java $(PKG)/Main.java
+CLASSES = $(PKG)/Tokenizer.java $(PKG)/TokenizerImpl.java $(PKG)/ParseTree.java $(PKG)/ParseTreeImpl.java $(PKG)/Parser.java
 
 default: classes
 
 classes: $(CLASSES:.java=.class)
 
 jar: $(PKG)/*.class MANIFEST.MF
-	jar cmvf MANIFEST.MF Tokenizer.jar $(PKG)/*.class
+	jar cmvf MANIFEST.MF Parser.jar $(PKG)/*.class
 
 run: *.jar
-	java -jar Tokenizer.jar
+	java -jar Parser.jar
 
 clean:
 	$(RM) *.class *.jar

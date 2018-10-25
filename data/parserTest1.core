@@ -1,11 +1,9 @@
 program
-int X , Y ;
+int 123A4B;
 begin 
-  X = 13 ;
-  if ( X > 10) then
-    write X ;
-    read X ;
-  else
-    X = X + 1 ;
-  end;
+  X=13;
+  while (X>10) loop
+    write X;
+    read X;
+    end;
 end

@@ -1,7 +1,9 @@
 package edu.osu.cse3341;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ParseTreeImpl implements ParseTree {
 
@@ -22,10 +24,14 @@ public class ParseTreeImpl implements ParseTree {
 	List<Node> tree;
 	int cursor;
 
+	static Map<String, Integer> st;
+
 	public ParseTreeImpl() {
 		cursor = 0;
 		tree = new ArrayList<>();
 		tree.add(new Node());
+
+		st = new HashMap<>();
 	}
 
 	@Override
@@ -50,7 +56,7 @@ public class ParseTreeImpl implements ParseTree {
 
 	@Override
 	public void moveToParent() {
-		Node parent = tree.get(tree.get(cursor).parent);
+		// Node parent = tree.get(tree.get(cursor).parent);
 		cursor = tree.get(cursor).parent;
 	}
 
@@ -63,19 +69,35 @@ public class ParseTreeImpl implements ParseTree {
 	public String getIdString() {
 		assert this.getNodeType() == NodeType.valueOf("ID") : "Cursor must be an ID node";
 
+		// TODO handle ST?
 		return tree.get(cursor).name;
 	}
 
 	@Override
-	public void setIdValue(int value) {
-		assert this.getNodeType() == NodeType.valueOf("ID") : "Cursor must be an ID node";
-		tree.get(cursor).value = value;
+	public void setValue(int value) {
+		assert this.getNodeType() == NodeType.valueOf("ID")
+				|| this.getNodeType() == NodeType.valueOf("INT") : "Cursor must be an ID node";
+		if (this.getNodeType() == NodeType.valueOf("INT")) {
+			tree.get(cursor).value = value;
+		} else {
+			String id = this.getIdString();
+			st.put(id, value);
+		}
 	}
 
 	@Override
-	public int getIdValue() {
-		assert this.getNodeType() == NodeType.valueOf("ID") : "Cursor must be an ID node";
-		return tree.get(cursor).value;
+	public int getValue() {
+		assert this.getNodeType() == NodeType.valueOf("ID")
+				|| this.getNodeType() == NodeType.valueOf("INT") : "Cursor must be an ID node";
+
+		int val = Integer.MIN_VALUE;
+		if (this.getNodeType() == NodeType.valueOf("INT")) {
+			val = tree.get(cursor).value;
+		} else {
+			String id = this.getIdString();
+			val = st.get(id);
+		}
+		return val;
 	}
 
 	@Override
@@ -100,5 +122,9 @@ public class ParseTreeImpl implements ParseTree {
 	@Override
 	public void setIdString(String id) {
 		tree.get(cursor).name = id;
+
+		if (!st.containsKey(id)) {
+			st.put(id, Integer.MIN_VALUE);
+		}
 	}
 }

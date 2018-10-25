@@ -34,8 +34,9 @@ public interface Tokenizer {
 	 *
 	 * @requires [A file exists at {@code filepath}]
 	 * @param filepath The path of the file to tokenize
+	 * @throws InvalidTokenException 
 	 */
-	void tokenize(String filepath);
+	void tokenize(String filepath) throws InvalidTokenException;
 
 	/**
 	 * Returns the integer code for the given token.

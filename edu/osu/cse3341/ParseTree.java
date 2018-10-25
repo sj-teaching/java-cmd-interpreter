@@ -67,12 +67,12 @@ public interface ParseTree {
 	 * 
 	 * @param value integer value to be set
 	 */
-	void setIdValue(int value);
+	void setValue(int value);
 
 	/**
 	 * Reports the integer value of the current node if it's an ID node.
 	 * 
 	 * @return integer value of the ID
 	 */
-	int getIdValue();
+	int getValue();
 }
