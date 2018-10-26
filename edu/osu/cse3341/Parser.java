@@ -71,6 +71,8 @@ public class Parser {
 
 		if (declare && pt.isDeclared(id)) {
 			throw new IdRedeclException("[Line " + t.currentTokenLine() + "] " + id + " already declared");
+		} else if (!declare && !pt.isDeclared(id)) {
+			throw new IdUndeclException("[Line " + t.currentTokenLine() + "] Using undeclared variable " + id);
 		} else {
 			pt.setIdString(id);
 		}

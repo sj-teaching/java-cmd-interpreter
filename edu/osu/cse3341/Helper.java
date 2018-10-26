@@ -18,7 +18,7 @@ public class Helper {
 //        Handler handler = new ConsoleHandler();
 //        handler.setLevel(Level.ALL);
 //        log.addHandler(handler);
-		log.setLevel(Level.ALL);
+		log.setLevel(Level.SEVERE);
 		log.fine("Logger created");
 	}
 }
