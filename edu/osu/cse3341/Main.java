@@ -8,7 +8,7 @@ public class Main {
 
 		Helper.log.info("Arguments: " + Arrays.toString(args));
 		if (args.length != 1) {
-			String msg = "Invalid number of arguments\nUsage: java Main <input-file-name>";
+			String msg = "Invalid number of arguments\nUsage: java -jar <jar file> <test file>";
 			Helper.log.severe(msg);
 			System.exit(10);
 		}

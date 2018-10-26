@@ -705,18 +705,20 @@ public class Parser {
 
 	static void printProg(ParseTree pt) {
 		assert pt.getNodeType() == NodeType.PROG : "Node must be an PROG";
-		print("program\n");
+		print("program \n");
 		indentLevel++;
 		pt.moveToChild(0);
 		printDS(pt);
 		pt.moveToParent();
-		indentLevel--;
+//		indentLevel--;
+		indent();
 		print("begin\n");
 		indentLevel++;
 		pt.moveToChild(1);
 		printSS(pt);
 		pt.moveToParent();
 		indentLevel--;
+		indent();
 		print("end\n");
 	}
 }
