@@ -1,4 +1,4 @@
-JFLAGS = -g
+# JFLAGS = -g
 JC = javac
 
 PKG = edu/osu/cse3341
@@ -8,17 +8,23 @@ PKG = edu/osu/cse3341
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-CLASSES = $(PKG)/Tokenizer.java $(PKG)/TokenizerImpl.java $(PKG)/ParseTree.java $(PKG)/ParseTreeImpl.java $(PKG)/Parser.java
+CLASSES = $(PKG)/Helper.java $(PKG)/ParseTreeImpl.java $(PKG)/IdRedeclException.java \
+	$(PKG)/Parser.java $(PKG)/IdUndeclException.java $(PKG)/Token.java \
+	$(PKG)/InterpreterException.java $(PKG)/Tokenizer.java \
+	$(PKG)/InvalidTokenException.java    $(PKG)/TokenizerImpl.java \
+	$(PKG)/Main.java                     $(PKG)/UnexpectedTokenException.java \
+	$(PKG)/ParseTree.java
+
 
 default: classes
 
 classes: $(CLASSES:.java=.class)
 
-jar: $(PKG)/*.class MANIFEST.MF
+jar: classes MANIFEST.MF
 	jar cmvf MANIFEST.MF Parser.jar $(PKG)/*.class
 
 run: *.jar
 	java -jar Parser.jar
 
 clean:
-	$(RM) *.class *.jar
+	$(RM) $(PKG)/*.class *.jar
