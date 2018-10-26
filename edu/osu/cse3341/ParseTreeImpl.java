@@ -48,7 +48,7 @@ public class ParseTreeImpl implements ParseTree {
 	public int getValue() {
 		assert this.getNodeType() == NodeType.valueOf("ID")
 				|| this.getNodeType() == NodeType.valueOf("INT") : "Cursor must be an ID node";
-	
+
 		int val = Integer.MIN_VALUE;
 		if (this.getNodeType() == NodeType.valueOf("INT")) {
 			val = tree.get(cursor).value;
@@ -84,7 +84,7 @@ public class ParseTreeImpl implements ParseTree {
 	@Override
 	public String getIdString() {
 		assert this.getNodeType() == NodeType.valueOf("ID") : "Cursor must be an ID node";
-	
+
 		// TODO handle ST?
 		return tree.get(cursor).name;
 	}
@@ -92,7 +92,7 @@ public class ParseTreeImpl implements ParseTree {
 	@Override
 	public void setIdString(String id) {
 		tree.get(cursor).name = id;
-	
+
 		if (!st.containsKey(id)) {
 			st.put(id, Integer.MIN_VALUE);
 		}
@@ -103,7 +103,7 @@ public class ParseTreeImpl implements ParseTree {
 		Node temp = new Node();
 		temp.parent = cursor;
 		tree.get(cursor).children.add(tree.size());
-	
+
 		tree.add(temp);
 	}
 
@@ -126,5 +126,16 @@ public class ParseTreeImpl implements ParseTree {
 	@Override
 	public boolean hasParent() {
 		return tree.get(cursor).parent >= 0;
+	}
+
+	@Override
+	public boolean isDeclared(String id) {
+		return st.containsKey(id);
+	}
+
+	@Override
+	public boolean isInitialized(String id) {
+		// TODO need more
+		return isDeclared(id);
 	}
 }

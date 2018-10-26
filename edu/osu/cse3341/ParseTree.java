@@ -36,7 +36,7 @@ public interface ParseTree {
 	 * @return whether it has a parent
 	 */
 	boolean hasParent();
-	
+
 	/**
 	 * Add a child to the current node in the parse tree.
 	 */
@@ -60,6 +60,7 @@ public interface ParseTree {
 	 * @return string value of the id
 	 */
 	String getIdString();
+
 	void setIdString(String id);
 
 	/**
@@ -75,4 +76,8 @@ public interface ParseTree {
 	 * @return integer value of the ID
 	 */
 	int getValue();
+
+	boolean isDeclared(String id);
+
+	boolean isInitialized(String id);
 }

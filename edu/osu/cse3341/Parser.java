@@ -12,7 +12,7 @@ public class Parser {
 		/* cannot be instantiated - use all static methods */
 	}
 
-	public static ParseTree parse(String filepath) throws UnexpectedTokenException, InvalidTokenException {
+	public static ParseTree parse(String filepath) throws InterpreterException {
 		t = new TokenizerImpl();
 		t.tokenize(filepath);
 		Helper.log.info(t.getTokenStream());
@@ -28,7 +28,7 @@ public class Parser {
 	}
 
 	// --- Helper Methods ---
-	static void matchConsume(String exptok) throws UnexpectedTokenException {
+	static void matchConsume(String exptok) throws InterpreterException {
 		String actual = t.currentToken();
 		if ((exptok.equals("INT") && t.code(actual) != 31) // int code
 				|| (exptok.equals("ID") && t.code(actual) != 32) // id code
@@ -55,7 +55,7 @@ public class Parser {
 
 	// --- Parse Methods ---
 
-	static void parseInt(ParseTree pt) throws UnexpectedTokenException {
+	static void parseInt(ParseTree pt) throws InterpreterException {
 		pt.setAlt(1);
 		pt.setNodeType(NodeType.INT);
 		int val = Integer.parseInt(t.currentToken());
@@ -63,16 +63,20 @@ public class Parser {
 		matchConsume("INT");
 	}
 
-	static void parseId(ParseTree pt) {
+	static void parseId(ParseTree pt, boolean declare) throws InterpreterException {
 		pt.setNodeType(NodeType.ID);
 		String id = t.currentToken();
 		t.nextToken();
 		Helper.log.info("Consumed: " + id);
 
-		pt.setIdString(id);
+		if (declare && pt.isDeclared(id)) {
+			throw new IdRedeclException("[Line " + t.currentTokenLine() + "] " + id + " already declared");
+		} else {
+			pt.setIdString(id);
+		}
 	}
 
-	static void parseFac(ParseTree pt) throws UnexpectedTokenException {
+	static void parseFac(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.FAC);
 
 		String tok = t.currentToken();
@@ -86,7 +90,7 @@ public class Parser {
 			pt.setAlt(2);
 			pt.addChild();
 			pt.moveToChild(0);
-			parseId(pt);
+			parseId(pt, false);
 			pt.moveToParent();
 		} else if (tok.equals("(")) {
 			matchConsume("(");
@@ -102,7 +106,7 @@ public class Parser {
 		}
 	}
 
-	static void parseTerm(ParseTree pt) throws UnexpectedTokenException {
+	static void parseTerm(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.TERM);
 		pt.addChild();
 		pt.moveToChild(0);
@@ -121,7 +125,7 @@ public class Parser {
 		}
 	}
 
-	static void parseExp(ParseTree pt) throws UnexpectedTokenException {
+	static void parseExp(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.EXP);
 		pt.addChild();
 		pt.moveToChild(0);
@@ -169,7 +173,7 @@ public class Parser {
 		Helper.log.info("Consumed " + tok);
 	}
 
-	static void parseComp(ParseTree pt) throws UnexpectedTokenException {
+	static void parseComp(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.COMP);
 		matchConsume("(");
 		pt.addChild();
@@ -190,7 +194,7 @@ public class Parser {
 		matchConsume(")");
 	}
 
-	static void parseCond(ParseTree pt) throws UnexpectedTokenException {
+	static void parseCond(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.COND);
 
 		String tok = t.currentToken();
@@ -233,11 +237,11 @@ public class Parser {
 		}
 	}
 
-	static void parseIdList(ParseTree pt) throws UnexpectedTokenException {
+	static void parseIdList(ParseTree pt, boolean declare) throws InterpreterException {
 		pt.setNodeType(NodeType.IDLIST);
 		pt.addChild();
 		pt.moveToChild(0);
-		parseId(pt);
+		parseId(pt, declare);
 		pt.moveToParent();
 
 		String tok = t.currentToken();
@@ -248,41 +252,41 @@ public class Parser {
 			pt.setAlt(2);
 			pt.addChild();
 			pt.moveToChild(1);
-			parseIdList(pt);
+			parseIdList(pt, declare);
 			pt.moveToParent();
 		} else {
 			pt.setAlt(1);
 		}
 	}
 
-	static void parseIn(ParseTree pt) throws UnexpectedTokenException {
+	static void parseIn(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.IN);
 		matchConsume("read");
 		pt.addChild();
 		pt.moveToChild(0);
-		parseIdList(pt);
+		parseIdList(pt, false);
 		pt.moveToParent();
 
 		matchConsume(";");
 	}
 
-	static void parseOut(ParseTree pt) throws UnexpectedTokenException {
+	static void parseOut(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.OUT);
 		matchConsume("write");
 		pt.addChild();
 		pt.moveToChild(0);
-		parseIdList(pt);
+		parseIdList(pt, false);
 		pt.moveToParent();
 
 		matchConsume(";");
 	}
 
-	static void parseAssign(ParseTree pt) throws UnexpectedTokenException {
+	static void parseAssign(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.ASSIGN);
 
 		pt.addChild();
 		pt.moveToChild(0);
-		parseId(pt);
+		parseId(pt, false);
 		pt.moveToParent();
 
 		matchConsume("=");
@@ -295,7 +299,7 @@ public class Parser {
 		matchConsume(";");
 	}
 
-	static void parseLoop(ParseTree pt) throws UnexpectedTokenException {
+	static void parseLoop(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.LOOP);
 		matchConsume("while");
 		pt.addChild();
@@ -313,7 +317,7 @@ public class Parser {
 		matchConsume(";");
 	}
 
-	static void parseIf(ParseTree pt) throws UnexpectedTokenException {
+	static void parseIf(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.IF);
 		pt.setAlt(1);
 
@@ -343,7 +347,7 @@ public class Parser {
 		matchConsume(";");
 	}
 
-	static void parseStmt(ParseTree pt) throws UnexpectedTokenException {
+	static void parseStmt(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.STMT);
 		String tok = t.currentToken();
 
@@ -377,7 +381,7 @@ public class Parser {
 
 	}
 
-	static void parseSS(ParseTree pt) throws UnexpectedTokenException {
+	static void parseSS(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.SS);
 
 		pt.addChild();
@@ -398,18 +402,18 @@ public class Parser {
 		}
 	}
 
-	static void parseDecl(ParseTree pt) throws UnexpectedTokenException {
+	static void parseDecl(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.DECL);
 		matchConsume("int");
 		pt.addChild();
 		pt.moveToChild(0);
-		parseIdList(pt);
+		parseIdList(pt, true);
 		pt.moveToParent();
 
 		matchConsume(";");
 	}
 
-	static void parseDS(ParseTree pt) throws UnexpectedTokenException {
+	static void parseDS(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.DS);
 
 		pt.addChild();
@@ -421,12 +425,12 @@ public class Parser {
 			pt.setAlt(2);
 			pt.addChild();
 			pt.moveToChild(1);
-			parseIdList(pt);
+			parseDS(pt);
 			pt.moveToParent();
 		}
 	}
 
-	static void parseProg(ParseTree pt) throws UnexpectedTokenException {
+	static void parseProg(ParseTree pt) throws InterpreterException {
 		pt.setNodeType(NodeType.PROG);
 		matchConsume("program");
 		pt.addChild();
