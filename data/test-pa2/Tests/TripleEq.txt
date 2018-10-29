@@ -1,0 +1,8 @@
+program 
+int X;
+begin
+X = 46;
+if (X===45) then
+write X;
+end;
+end

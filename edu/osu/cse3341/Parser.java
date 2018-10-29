@@ -66,6 +66,12 @@ public class Parser {
 	static void parseId(ParseTree pt, boolean declare) throws InterpreterException {
 		pt.setNodeType(NodeType.ID);
 		String id = t.currentToken();
+
+		if (t.code(id) != 32) {
+			Helper.log.info("Syntax Error! Expected: <id>, found: " + id);
+			throw new UnexpectedTokenException(
+					"Syntax Error: [Line " + t.currentTokenLine() + "] Expected: <id>, found: " + id);
+		}
 		t.nextToken();
 		Helper.log.info("Consumed: " + id);
 
