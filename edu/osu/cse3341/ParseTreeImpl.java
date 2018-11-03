@@ -94,7 +94,7 @@ public class ParseTreeImpl implements ParseTree {
 		tree.get(cursor).name = id;
 
 		if (!st.containsKey(id)) {
-			st.put(id, Integer.MIN_VALUE);
+			st.put(id, 0);
 		}
 	}
 
