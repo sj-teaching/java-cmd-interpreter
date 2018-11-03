@@ -1,8 +1,12 @@
 package edu.osu.cse3341;
 
+import java.util.Scanner;
+
 import edu.osu.cse3341.ParseTree.NodeType;
 
 public class Interpreter {
+
+	private static Scanner keyboard = new Scanner(System.in);
 
 	public static int evalFac(ParseTree pt) {
 		assert pt.getNodeType() == NodeType.FAC : "Node must be a FAC";
@@ -126,15 +130,147 @@ public class Interpreter {
 		}
 		return val;
 	}
-//	printIdList(ParseTree)
-//	printIn(ParseTree)
-//	printOut(ParseTree)
-//	printAssign(ParseTree)
-//	printLoop(ParseTree)
-//	printIf(ParseTree)
-//	printStmt(ParseTree)
-//	printSS(ParseTree)
-//	printDecl(ParseTree)
-//	printDS(ParseTree)
-//	printProg(ParseTree)
+
+	public static void readIdList(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.IDLIST : "Node must be an IDLIST";
+
+		pt.moveToChild(0);
+		String id = pt.getIdString();
+		System.out.print(id + " =? ");
+		int val = keyboard.nextInt();
+		pt.setValue(val);
+		pt.moveToParent();
+
+		if (pt.getAlt() == 2) {
+			pt.moveToChild(1);
+			readIdList(pt);
+			pt.moveToParent();
+		}
+	}
+
+	public static void writeIdList(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.IDLIST : "Node must be an IDLIST";
+
+		pt.moveToChild(0);
+		String id = pt.getIdString();
+		System.out.println(id + " = " + pt.getValue());
+		pt.moveToParent();
+
+		if (pt.getAlt() == 2) {
+			pt.moveToChild(1);
+			writeIdList(pt);
+			pt.moveToParent();
+		}
+	}
+
+	public static void execIn(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.IN : "Node must be an IN";
+
+		pt.moveToChild(0);
+		readIdList(pt);
+		pt.moveToParent();
+	}
+
+	public static void execOut(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.OUT : "Node must be an OUT";
+
+		pt.moveToChild(0);
+		writeIdList(pt);
+		pt.moveToParent();
+	}
+
+	public static void execAssign(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.ASSIGN : "Node must be an ASSIGN";
+
+		pt.moveToChild(1);
+		int val = evalExp(pt);
+		pt.moveToParent();
+
+		pt.moveToChild(0);
+		pt.setValue(val);
+		pt.moveToParent();
+	}
+
+	public static void execIf(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.IF : "Node must be an IF";
+
+		pt.moveToChild(0);
+		boolean cond = evalCond(pt);
+		pt.moveToParent();
+
+		if (cond) {
+			pt.moveToChild(1);
+			execSS(pt);
+			pt.moveToParent();
+		} else if (pt.getAlt() == 2) {
+			pt.moveToChild(2);
+			execSS(pt);
+			pt.moveToParent();
+		}
+	}
+
+	public static void execLoop(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.LOOP : "Node must be a LOOP";
+
+		pt.moveToChild(0);
+		boolean cond = evalCond(pt);
+		pt.moveToParent();
+
+		while (cond) {
+			pt.moveToChild(1);
+			execSS(pt);
+			pt.moveToParent();
+
+			pt.moveToChild(0);
+			cond = evalCond(pt);
+			pt.moveToParent();
+		}
+	}
+
+	public static void execStmt(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.STMT : "Node must be a STMT";
+
+		// <stmt> ::= <assign>
+		// | <if>
+		// | <loop>
+		// | <in>
+		// | <out>
+
+		int alt = pt.getAlt();
+		pt.moveToChild(0);
+		if (alt == 1) {
+			execAssign(pt);
+		} else if (alt == 2) {
+			execIf(pt);
+		} else if (alt == 3) {
+			execLoop(pt);
+		} else if (alt == 4) {
+			execIn(pt);
+		} else {
+			execOut(pt);
+		}
+		pt.moveToParent();
+	}
+
+	public static void execSS(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.SS : "Node must be a SS";
+
+		pt.moveToChild(0);
+		execStmt(pt);
+		pt.moveToParent();
+
+		if (pt.getAlt() == 2) {
+			pt.moveToChild(1);
+			execSS(pt);
+			pt.moveToParent();
+		}
+	}
+
+	public static void execProg(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.PROG : "Node must be a PROG";
+
+		pt.moveToChild(1);
+		execSS(pt);
+		pt.moveToParent();
+	}
 }
