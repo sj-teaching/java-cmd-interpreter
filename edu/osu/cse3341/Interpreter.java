@@ -40,7 +40,7 @@ public class Interpreter {
 	}
 
 	public static int evalExp(ParseTree pt) {
-		assert pt.getNodeType() == NodeType.EXP : "Node must be a TERM";
+		assert pt.getNodeType() == NodeType.EXP : "Node must be an EXP";
 
 		int alt = pt.getAlt();
 
@@ -59,9 +59,73 @@ public class Interpreter {
 		}
 		return val;
 	}
-//	printCompOp(ParseTree)
-//	printComp(ParseTree)
-//	printCond(ParseTree)
+
+	public static boolean evalComp(ParseTree pt) {
+		assert pt.getNodeType() == NodeType.COMP : "Node must be a COMP";
+
+		pt.moveToChild(0);
+		int fac1 = evalFac(pt);
+		pt.moveToParent();
+
+		pt.moveToChild(1);
+		int compOp = pt.getAlt();
+		pt.moveToParent();
+
+		pt.moveToChild(2);
+		int fac2 = evalFac(pt);
+		pt.moveToParent();
+
+		boolean val = false;
+		if (compOp == 1) {// !=
+			val = fac1 != fac2;
+		} else if (compOp == 2) { // ==
+			val = fac1 == fac2;
+		} else if (compOp == 3) { // <
+			val = fac1 < fac2;
+		} else if (compOp == 4) { // >
+			val = fac1 > fac2;
+		} else if (compOp == 5) { // <=
+			val = fac1 <= fac2;
+		} else { // >=
+			val = fac1 >= fac2;
+		}
+
+		return val;
+	}
+
+	public static boolean evalCond(ParseTree pt) {
+		// <cond> ::= <comp>
+		// | !<cond>
+		// | [ <cond> and <cond> ]
+		// | [ <cond> or <cond> ]
+
+		assert pt.getNodeType() == NodeType.COND : "Node must be a COND";
+		boolean val = false;
+		int alt = pt.getAlt();
+
+		if (alt == 1) {
+			pt.moveToChild(0);
+			val = evalComp(pt);
+			pt.moveToParent();
+		} else {
+			pt.moveToChild(0);
+			boolean cond1 = evalCond(pt);
+			pt.moveToParent();
+			if (alt == 2) {
+				val = !cond1;
+			} else {
+				pt.moveToChild(1);
+				boolean cond2 = evalCond(pt);
+				pt.moveToParent();
+				if (alt == 3) {
+					val = cond1 && cond2;
+				} else {
+					val = cond1 || cond2;
+				}
+			}
+		}
+		return val;
+	}
 //	printIdList(ParseTree)
 //	printIn(ParseTree)
 //	printOut(ParseTree)
