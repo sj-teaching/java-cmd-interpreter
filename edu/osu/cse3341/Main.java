@@ -26,7 +26,9 @@ public class Main {
 
 		try {
 			ParseTree pt = Parser.parse(args[0]);
-			Parser.print(pt);
+//			Parser.print(pt);
+//			System.out.println("\n\n*** Result: ***\n");
+			Interpreter.execProg(pt);
 		} catch (InterpreterException e) {
 			Helper.log.info(e.getMessage());
 			System.err.println(e.getMessage());
