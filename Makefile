@@ -8,12 +8,7 @@ PKG = edu/osu/cse3341
 .java.class:
 	$(JC) $(JFLAGS) $*.java
 
-CLASSES = $(PKG)/Helper.java $(PKG)/ParseTreeImpl.java $(PKG)/IdRedeclException.java \
-	$(PKG)/Parser.java $(PKG)/IdUndeclException.java $(PKG)/Token.java \
-	$(PKG)/InterpreterException.java $(PKG)/Tokenizer.java \
-	$(PKG)/InvalidTokenException.java    $(PKG)/TokenizerImpl.java \
-	$(PKG)/Main.java                     $(PKG)/UnexpectedTokenException.java \
-	$(PKG)/ParseTree.java
+CLASSES := $(shell ls $(PKG)/*.java)
 
 
 default: classes
@@ -21,10 +16,10 @@ default: classes
 classes: $(CLASSES:.java=.class)
 
 jar: classes MANIFEST.MF
-	jar cmvf MANIFEST.MF Parser.jar $(PKG)/*.class
+	jar cmvf MANIFEST.MF Interpreter.jar $(PKG)/*.class
 
 run: *.jar
-	java -jar Parser.jar
+	java -jar Interpreter.jar
 
 clean:
 	$(RM) $(PKG)/*.class *.jar
