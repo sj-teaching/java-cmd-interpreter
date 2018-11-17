@@ -8,7 +8,7 @@ public class Token {
 	public Token(String name, int line) {
 		this.name = name;
 		this.line = line;
-		// TODO: How to infer type?
+		// TODO How to infer type?
 	}
 
 	public String getName() {

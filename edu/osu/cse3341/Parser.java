@@ -63,10 +63,11 @@ public class Parser {
 		matchConsume("INT");
 	}
 
-	static void parseId(ParseTree pt, boolean declare) throws InterpreterException {
+	static void parseId(ParseTree pt, boolean declare, boolean init) throws InterpreterException {
 		pt.setNodeType(NodeType.ID);
 		String id = t.currentToken();
 
+		// TODO Remove hard coded numbers
 		if (t.code(id) != 32) {
 			Helper.log.info("Syntax Error! Expected: <id>, found: " + id);
 			throw new UnexpectedTokenException(
@@ -77,10 +78,22 @@ public class Parser {
 
 		if (declare && pt.isDeclared(id)) {
 			throw new IdRedeclException("[Line " + t.currentTokenLine() + "] " + id + " already declared");
-		} else if (!declare && !pt.isDeclared(id)) {
+		}
+		if (!declare && !pt.isDeclared(id)) {
 			throw new IdUndeclException("[Line " + t.currentTokenLine() + "] Using undeclared variable " + id);
-		} else {
-			pt.setIdString(id);
+		}
+
+		pt.setIdString(id);
+
+		Helper.log.info("parseId - id = " + id + ", init = " + init);
+		if (!declare) {
+			if (!init && !pt.isInitialized(id)) {
+				throw new UninitializedException(
+						"[Line " + t.currentTokenLine() + "] Use of variable " + id + " before initialization");
+			}
+			if (init) {
+				pt.initialize(id);
+			}
 		}
 	}
 
@@ -98,7 +111,7 @@ public class Parser {
 			pt.setAlt(2);
 			pt.addChild();
 			pt.moveToChild(0);
-			parseId(pt, false);
+			parseId(pt, false, false);
 			pt.moveToParent();
 		} else if (tok.equals("(")) {
 			matchConsume("(");
@@ -245,11 +258,11 @@ public class Parser {
 		}
 	}
 
-	static void parseIdList(ParseTree pt, boolean declare) throws InterpreterException {
+	static void parseIdList(ParseTree pt, boolean declare, boolean init) throws InterpreterException {
 		pt.setNodeType(NodeType.IDLIST);
 		pt.addChild();
 		pt.moveToChild(0);
-		parseId(pt, declare);
+		parseId(pt, declare, init);
 		pt.moveToParent();
 
 		String tok = t.currentToken();
@@ -260,7 +273,7 @@ public class Parser {
 			pt.setAlt(2);
 			pt.addChild();
 			pt.moveToChild(1);
-			parseIdList(pt, declare);
+			parseIdList(pt, declare, init);
 			pt.moveToParent();
 		} else {
 			pt.setAlt(1);
@@ -272,7 +285,7 @@ public class Parser {
 		matchConsume("read");
 		pt.addChild();
 		pt.moveToChild(0);
-		parseIdList(pt, false);
+		parseIdList(pt, false, true);
 		pt.moveToParent();
 
 		matchConsume(";");
@@ -283,7 +296,7 @@ public class Parser {
 		matchConsume("write");
 		pt.addChild();
 		pt.moveToChild(0);
-		parseIdList(pt, false);
+		parseIdList(pt, false, false);
 		pt.moveToParent();
 
 		matchConsume(";");
@@ -294,7 +307,7 @@ public class Parser {
 
 		pt.addChild();
 		pt.moveToChild(0);
-		parseId(pt, false);
+		parseId(pt, false, true);
 		pt.moveToParent();
 
 		matchConsume("=");
@@ -415,7 +428,7 @@ public class Parser {
 		matchConsume("int");
 		pt.addChild();
 		pt.moveToChild(0);
-		parseIdList(pt, true);
+		parseIdList(pt, true, false);
 		pt.moveToParent();
 
 		matchConsume(";");

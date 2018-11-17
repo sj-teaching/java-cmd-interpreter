@@ -1,9 +1,7 @@
 package edu.osu.cse3341;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ParseTreeImpl implements ParseTree {
 
@@ -24,14 +22,15 @@ public class ParseTreeImpl implements ParseTree {
 	List<Node> tree;
 	int cursor;
 
-	static Map<String, Integer> st;
+//	static Map<String, Integer> st;
+	static SymbolTable st;
 
 	public ParseTreeImpl() {
 		cursor = 0;
 		tree = new ArrayList<>();
 		tree.add(new Node());
 
-		st = new HashMap<>();
+		st = new SymbolTable();
 	}
 
 	@Override
@@ -54,7 +53,7 @@ public class ParseTreeImpl implements ParseTree {
 			val = tree.get(cursor).value;
 		} else {
 			String id = this.getIdString();
-			val = st.get(id);
+			val = st.getValue(id);
 		}
 		return val;
 	}
@@ -67,7 +66,7 @@ public class ParseTreeImpl implements ParseTree {
 			tree.get(cursor).value = value;
 		} else {
 			String id = this.getIdString();
-			st.put(id, value);
+			st.setValue(id, value);
 		}
 	}
 
@@ -93,8 +92,8 @@ public class ParseTreeImpl implements ParseTree {
 	public void setIdString(String id) {
 		tree.get(cursor).name = id;
 
-		if (!st.containsKey(id)) {
-			st.put(id, 0);
+		if (!st.hasId(id)) {
+			st.add(id);
 		}
 	}
 
@@ -130,12 +129,16 @@ public class ParseTreeImpl implements ParseTree {
 
 	@Override
 	public boolean isDeclared(String id) {
-		return st.containsKey(id);
+		return st.hasId(id);
 	}
 
 	@Override
 	public boolean isInitialized(String id) {
-		// TODO need more
-		return isDeclared(id);
+		return st.isInitialized(id);
+	}
+
+	@Override
+	public void initialize(String id) {
+		st.initialize(id);
 	}
 }

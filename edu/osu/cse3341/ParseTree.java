@@ -80,4 +80,6 @@ public interface ParseTree {
 	boolean isDeclared(String id);
 
 	boolean isInitialized(String id);
+
+	void initialize(String id);
 }
