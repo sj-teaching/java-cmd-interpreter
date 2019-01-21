@@ -1,5 +1,6 @@
-program 
-int X,,;
-begin
-X=45;
+program
+int X,Y,Z;
+begin 
+  read X;
+  Y = Z * 10;
 end
