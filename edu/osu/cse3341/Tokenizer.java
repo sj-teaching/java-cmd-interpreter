@@ -18,4 +18,8 @@ public interface Tokenizer {
 	 * @requires [Another token exists on the stream]
 	 */
 	void nextToken() throws InvalidTokenException;
+
+	boolean hasNext();
+
+	void tokenize(String filePath) throws InvalidTokenException;
 }

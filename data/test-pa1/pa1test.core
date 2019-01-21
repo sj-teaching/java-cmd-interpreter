@@ -1,2 +1,3 @@
-program
-int
+	program   begin   end   int   if   then   else   while   loop   read   write   and   or
+    				; ,   =   !   [   ]   (   )   +   -   *   !=   ==   >=   <=   >   <  
+    

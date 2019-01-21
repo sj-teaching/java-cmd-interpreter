@@ -5,190 +5,206 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class TokenizerImpl implements Tokenizer {
-	/**
-	 * Set of white space characters.
-	 */
-	private final Set<Character> WHITESPACES;
 
 	/**
-	 * Reserved words in the CORE language.
+	 * List of tokens from the language.
 	 */
-	private final List<String> RESERVED_WORDS;
+	private List<String> tokens;
 
 	/**
-	 * Special symbols in the CORE language.
+	 * The token stream to be generated.
 	 */
-	private final List<String> SPECIAL_SYMBOLS;
+	private List<Token> tokenStream;
+
+	/**
+	 * Index of the current token in the {@code tokenStream}.
+	 */
+	private int currentIndex;
+
+	/**
+	 * Placeholder for the current character on the input stream.
+	 */
+	private Character current;
 
 	/**
 	 * Keeps track of the current line number.
 	 */
-	private int line;
+	private int lineNum;
 
-	/**
-	 * File to be scanned.
-	 */
-	private FileReader inputStream;
+	TokenizerImpl() {
+		// Build the list of tokens from the language
+		tokens = Arrays.asList(
+				// placeholder for index zero
+				"",
+				// reserved words
+				"program", "begin", "end", "int", "if", "then", "else", "while", "loop", "read", "write", "and", "or",
 
-	/**
-	 * Current token.
-	 */
-	private Token token;
+				// special symbols
+				";", ",", "=", "!", "[", "]", "(", ")", "+", "-", "*", "!=", "==", ">=", "<=", ">", "<",
 
-	/**
-	 * Current character from the input stream.
-	 */
-	private Character ch;
+				// integers
+				"INT",
 
-	TokenizerImpl(String filePath) throws InvalidTokenException {
-		try {
-			inputStream = new FileReader(filePath);
-		} catch (FileNotFoundException e) {
-			System.err.println("File " + filePath + " not found");
-			e.printStackTrace();
-		}
+				// identifier
+				"ID",
 
-		WHITESPACES = new HashSet<>(Arrays.asList(' ', '\t', '\r'));
+				// end-of-file
+				"~EOF~");
 
-		RESERVED_WORDS = Arrays.asList("program", "begin", "end", "int", //
-				"if", "then", "else", "while", "loop", "read", "write", //
-				"and", "or");
-
-		SPECIAL_SYMBOLS = Arrays.asList(";", ",", "=", "!", "[", "]", "(", //
-				")", "+", "-", "*", "!=", "==", ">=", "<=", ">", "<");
-
-		this.line = 1;
-
-		this.ch = nextChar();
-		this.nextToken();
+		// Initialize the private fields
+		tokenStream = new ArrayList<>();
+		currentIndex = 0;
+		current = null;
+		lineNum = 1;
 	}
 
 	@Override
 	public Token currentToken() {
-		return this.token;
+		return tokenStream.get(currentIndex);
 	}
 
 	@Override
-	public void nextToken() throws InvalidTokenException {
-		if (ch == null) {
-			this.token = new Token("", this.line, Token.Type.EOF);
-			return;
+	public void nextToken() {
+		assert hasNext() : "Violates there is another token on the stream.";
+		currentIndex++;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return currentIndex < tokenStream.size();
+	}
+
+	@Override
+	public void tokenize(String filePath) throws InvalidTokenException {
+		FileReader inputStream;
+
+		try {
+			inputStream = new FileReader(filePath);
+
+			current = nextChar(inputStream);
+			while (current != null) {
+				if (current == '\n') {
+					lineNum++;
+					current = nextChar(inputStream);
+				} else if (Character.isWhitespace(current)) {
+					current = nextChar(inputStream);
+					// ignore
+				} else if (Character.isLowerCase(current)) {
+					// See if it's a reserved word
+					StringBuilder sb = new StringBuilder();
+					while (current != null && Character.isLetterOrDigit(current)) {
+						sb.append(current);
+						current = nextChar(inputStream);
+					}
+
+					String tok = sb.toString();
+					if (tokens.indexOf(tok) < 0) {
+						// tok is not in tokens, i.e. these lowercase characters don't match a keyword
+						raiseError("Invalid reserved word " + tok);
+					}
+
+					tokenStream.add(new Token(tok, lineNum, tokens.indexOf(tok)));
+
+				} else if (Character.isUpperCase(current)) {
+					// See if it's an identifier
+					StringBuilder sb = new StringBuilder();
+					while (current != null && Character.isLetterOrDigit(current)) {
+						sb.append(current);
+						current = nextChar(inputStream);
+					}
+
+					String tok = sb.toString();
+					if (!tok.matches("[A-Z][A-Z]*[0-9]*") || tok.length() > 8) {
+						raiseError("Invalid identifier " + tok);
+					}
+					tokenStream.add(new Token(tok, lineNum, Token.ID));
+
+				} else if (Character.isDigit(current)) {
+					// See if it's a number
+					StringBuilder sb = new StringBuilder();
+					while (current != null && Character.isLetterOrDigit(current)) {
+						sb.append(current);
+						current = nextChar(inputStream);
+					}
+
+					String tok = sb.toString();
+					if (!tok.matches("[0-9][0-9]*") || tok.length() > 8) {
+						raiseError("Invalid numeric constant " + tok);
+					}
+					tokenStream.add(new Token(tok, lineNum, Token.NUM));
+				} else {
+					if (current == '!') {
+						Character next = nextChar(inputStream);
+						if (next == '=') {
+							tokenStream.add(new Token("!=", lineNum, Token.NEQ));
+							current = nextChar(inputStream);
+						} else {
+							tokenStream.add(new Token("!", lineNum, Token.NOT));
+							current = next;
+						}
+					} else if (current == '>') {
+						Character next = nextChar(inputStream);
+						if (next == '=') {
+							tokenStream.add(new Token(">=", lineNum, Token.GEQ));
+							current = nextChar(inputStream);
+						} else {
+							tokenStream.add(new Token(">", lineNum, Token.GT));
+							current = next;
+						}
+					} else if (current == '<') {
+						Character next = nextChar(inputStream);
+						if (next == '=') {
+							tokenStream.add(new Token("<=", lineNum, Token.LEQ));
+							current = nextChar(inputStream);
+						} else {
+							tokenStream.add(new Token("<", lineNum, Token.LT));
+							current = next;
+						}
+					} else if (current == '=') {
+						Character next = nextChar(inputStream);
+						if (next == '=') {
+							tokenStream.add(new Token("==", lineNum, Token.EQ));
+							current = nextChar(inputStream);
+						} else {
+							tokenStream.add(new Token("=", lineNum, Token.ASSIGN));
+							current = next;
+						}
+					} else {
+						String tok = "" + current;
+						if (tokens.indexOf(tok) < 0) {
+							raiseError("Invalid symbols " + tok);
+						}
+						tokenStream.add(new Token(tok, lineNum, tokens.indexOf(tok)));
+						current = nextChar(inputStream);
+					}
+				}
+			}
+
+			inputStream.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("File " + filePath + " not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			// add the special ~EOF~ symbol at the end
+			tokenStream.add(new Token("~EOF~", lineNum, Token.EOF));
 		}
-
-		while (WHITESPACES.contains(ch)) {
-			ch = nextChar();
-			// ignore
-		}
-
-		while (ch == '\n') {
-			this.line++;
-			ch = nextChar();
-		}
-
-		StringBuilder sb = new StringBuilder();
-
-		if (Character.isLowerCase(ch)) {
-			while (ch != null && Character.isLowerCase(ch)) {
-				sb.append(ch);
-				ch = nextChar();
-			}
-			String tok = sb.toString();
-			int code = RESERVED_WORDS.indexOf(tok) + 1; // add 1 for index offset
-			if (code > 0) {
-				// valid token
-				this.token = new Token(tok, this.line, code);
-			} else {
-				raiseError("Invalid reserved word " + tok);
-			}
-		} else if (Character.isUpperCase(ch)) {
-			while (ch != null && (Character.isUpperCase(ch) || Character.isDigit(ch))) {
-				sb.append(ch);
-				ch = nextChar();
-			}
-			String tok = sb.toString();
-			if (tok.matches("[A-Z][A-Z]*[0-9]*") && tok.length() <= 8) {
-				this.token = new Token(tok, this.line, Token.Type.ID); // Identifier
-			} else {
-				raiseError("Invalid identifier " + tok);
-			}
-		} else if (Character.isDigit(ch)) {
-			while (ch != null && Character.isDigit(ch)) {
-				sb.append(ch);
-				ch = nextChar();
-			}
-			String tok = sb.toString();
-			if (tok.matches("[0-9][0-9]*") && tok.length() <= 8) {
-				this.token = new Token(tok, this.line, Token.Type.INT);
-			} else {
-				raiseError("Invalid numeric constant " + tok);
-			}
-		} else {
-			if (ch == '!') {
-				Character next = nextChar();
-				if (next == '=') {
-					this.token = new Token("!=", this.line, Token.Type.NEQ);
-					ch = nextChar();
-				} else {
-					this.token = new Token("!", this.line, Token.Type.NOT);
-					ch = next;
-				}
-			} else if (ch == '>') {
-				Character next = nextChar();
-				if (next == '=') {
-					this.token = new Token(">=", this.line, Token.Type.GEQ);
-					ch = nextChar();
-				} else {
-					this.token = new Token("<=", this.line, Token.Type.GT);
-					ch = next;
-				}
-			} else if (ch == '<') {
-				Character next = nextChar();
-				if (next == '=') {
-					this.token = new Token("<=", this.line, Token.Type.LEQ);
-					ch = nextChar();
-				} else {
-					this.token = new Token("<", this.line, Token.Type.LT);
-					ch = next;
-				}
-			} else if (ch == '=') {
-				Character next = nextChar();
-				if (next == '=') {
-					this.token = new Token("==", this.line, Token.Type.EQ);
-					ch = nextChar();
-				} else {
-					this.token = new Token("==", this.line, Token.Type.ASSIGN);
-					ch = next;
-				}
-			} else {
-				String tok = "" + ch;
-				int code = SPECIAL_SYMBOLS.indexOf(tok);
-
-				if (code < 0) {
-					raiseError("Invalid symbol " + tok);
-				} else {
-					this.token = new Token(tok, this.line, 14 + code); // add 14 for the offset
-				}
-				ch = nextChar();
-			}
-		}
-
 	}
 
 	private void raiseError(String msg) throws InvalidTokenException {
-		String excMsg = "Invalid Token: [Line " + this.line + "] " + msg;
+		String excMsg = "Invalid Token: [Line " + lineNum + "] " + msg;
 		Helper.log.info(excMsg);
 		throw new InvalidTokenException(excMsg);
 	}
 
-	private Character nextChar() {
+	private Character nextChar(FileReader inputStream) {
 		Character character = null;
 		try {
-			int c = this.inputStream.read();
+			int c = inputStream.read();
 			if (c != -1) {
 				character = (char) c;
 			}
