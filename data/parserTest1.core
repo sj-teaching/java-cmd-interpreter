@@ -1,6 +1,0 @@
-program
-int X,Y,Z;
-begin 
-  read X;
-  Y = Z * 10;
-end
