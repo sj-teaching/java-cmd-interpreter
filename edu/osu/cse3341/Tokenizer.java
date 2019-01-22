@@ -80,7 +80,7 @@ public class Tokenizer {
 	/**
 	 * Advances to the next token in the stream.
 	 * 
-	 * @throws InvalidTokenException
+	 * @throws CoreError.InvalidTokenException
 	 *
 	 * @requires [Another token exists on the stream]
 	 */
@@ -93,7 +93,7 @@ public class Tokenizer {
 		return currentIndex < tokenStream.size();
 	}
 
-	public void tokenize(String filePath) throws InvalidTokenException {
+	public void tokenize(String filePath) throws CoreError.InvalidTokenException {
 		FileReader inputStream;
 
 		try {
@@ -210,10 +210,10 @@ public class Tokenizer {
 		}
 	}
 
-	private void raiseError(String msg) throws InvalidTokenException {
+	private void raiseError(String msg) throws CoreError.InvalidTokenException {
 		String excMsg = "Invalid Token: [Line " + line + "] " + msg;
 		log.info(excMsg);
-		throw new InvalidTokenException(excMsg);
+		throw new CoreError.InvalidTokenException(excMsg);
 	}
 
 	private Character nextChar(FileReader inputStream) {
@@ -244,7 +244,7 @@ public class Tokenizer {
 		Tokenizer t = new Tokenizer();
 		try {
 			t.tokenize(args[0]);
-		} catch (InvalidTokenException e) {
+		} catch (CoreError.InvalidTokenException e) {
 			log.severe(e.getLocalizedMessage());
 			System.exit(e.hashCode());
 		}

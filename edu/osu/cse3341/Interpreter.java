@@ -10,7 +10,7 @@ public class Interpreter {
 	private static final int RADIX = 10;
 	private static Scanner keyboard = new Scanner(System.in);
 
-	public static int evalFac(ParseTree pt) throws InterpreterException {
+	public static int evalFac(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.FAC : "Node must be a FAC";
 
 		int val = 0, alt = pt.getAlt();
@@ -27,7 +27,7 @@ public class Interpreter {
 		return val;
 	}
 
-	public static int evalTerm(ParseTree pt) throws InterpreterException {
+	public static int evalTerm(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.TERM : "Node must be a TERM";
 
 		int alt = pt.getAlt();
@@ -41,7 +41,7 @@ public class Interpreter {
 			try {
 				val = Math.multiplyExact(val, op2);
 			} catch (ArithmeticException e) {
-				throw new UnderflowOverflowException(
+				throw new CoreError.UnderflowOverflowException(
 						"Multiplication of " + val + " and " + op2 + " results in an underflow or overflow.");
 			}
 			pt.moveToParent();
@@ -50,7 +50,7 @@ public class Interpreter {
 		return val;
 	}
 
-	public static int evalExp(ParseTree pt) throws InterpreterException {
+	public static int evalExp(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.EXP : "Node must be an EXP";
 
 		int alt = pt.getAlt();
@@ -65,7 +65,7 @@ public class Interpreter {
 			try {
 				val = Math.addExact(val, op2);
 			} catch (ArithmeticException e) {
-				throw new UnderflowOverflowException(
+				throw new CoreError.UnderflowOverflowException(
 						"Multiplication of " + val + " and " + op2 + " results in an underflow or overflow.");
 			}
 			pt.moveToParent();
@@ -75,7 +75,7 @@ public class Interpreter {
 			try {
 				val = Math.subtractExact(val, op2);
 			} catch (ArithmeticException e) {
-				throw new UnderflowOverflowException(
+				throw new CoreError.UnderflowOverflowException(
 						"Multiplication of " + val + " and " + op2 + " results in an underflow or overflow.");
 			}
 			pt.moveToParent();
@@ -83,7 +83,7 @@ public class Interpreter {
 		return val;
 	}
 
-	public static boolean evalComp(ParseTree pt) throws InterpreterException {
+	public static boolean evalComp(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.COMP : "Node must be a COMP";
 
 		pt.moveToChild(0);
@@ -116,7 +116,7 @@ public class Interpreter {
 		return val;
 	}
 
-	public static boolean evalCond(ParseTree pt) throws InterpreterException {
+	public static boolean evalCond(ParseTree pt) throws CoreError.InterpreterException {
 		// <cond> ::= <comp>
 		// | !<cond>
 		// | [ <cond> and <cond> ]
@@ -150,7 +150,7 @@ public class Interpreter {
 		return val;
 	}
 
-	public static void readIdList(ParseTree pt) throws InterpreterException {
+	public static void readIdList(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.IDLIST : "Node must be an IDLIST";
 
 		pt.moveToChild(0);
@@ -161,7 +161,7 @@ public class Interpreter {
 		try {
 			val = keyboard.nextInt(RADIX);
 		} catch (InputMismatchException e) {
-			throw new InvalidInputException("User must enter a valid inetger.");
+			throw new CoreError.InvalidInputException("User must enter a valid inetger.");
 		}
 
 		pt.setValue(val);
@@ -189,7 +189,7 @@ public class Interpreter {
 		}
 	}
 
-	public static void execIn(ParseTree pt) throws InterpreterException {
+	public static void execIn(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.IN : "Node must be an IN";
 
 		pt.moveToChild(0);
@@ -205,7 +205,7 @@ public class Interpreter {
 		pt.moveToParent();
 	}
 
-	public static void execAssign(ParseTree pt) throws InterpreterException {
+	public static void execAssign(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.ASSIGN : "Node must be an ASSIGN";
 
 		pt.moveToChild(1);
@@ -217,7 +217,7 @@ public class Interpreter {
 		pt.moveToParent();
 	}
 
-	public static void execIf(ParseTree pt) throws InterpreterException {
+	public static void execIf(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.IF : "Node must be an IF";
 
 		pt.moveToChild(0);
@@ -235,7 +235,7 @@ public class Interpreter {
 		}
 	}
 
-	public static void execLoop(ParseTree pt) throws InterpreterException {
+	public static void execLoop(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.LOOP : "Node must be a LOOP";
 
 		pt.moveToChild(0);
@@ -253,7 +253,7 @@ public class Interpreter {
 		}
 	}
 
-	public static void execStmt(ParseTree pt) throws InterpreterException {
+	public static void execStmt(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.STMT : "Node must be a STMT";
 
 		// <stmt> ::= <assign>
@@ -278,7 +278,7 @@ public class Interpreter {
 		pt.moveToParent();
 	}
 
-	public static void execSS(ParseTree pt) throws InterpreterException {
+	public static void execSS(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.SS : "Node must be a SS";
 
 		pt.moveToChild(0);
@@ -292,7 +292,7 @@ public class Interpreter {
 		}
 	}
 
-	public static void execProg(ParseTree pt) throws InterpreterException {
+	public static void execProg(ParseTree pt) throws CoreError.InterpreterException {
 		assert pt.getNodeType() == NodeType.PROG : "Node must be a PROG";
 
 		pt.moveToChild(1);

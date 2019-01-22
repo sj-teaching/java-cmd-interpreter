@@ -16,7 +16,7 @@ classes: $(CLASSES:.java=.class)
 
 tokenizer: classes MANIFEST1.MF
 	jar cmvf MANIFEST1.MF Tokenizer.jar $(PKG)/Token.class $(PKG)/Tokenizer.class	\
-																			$(PKG)/InvalidTokenException.class				\
-																			$(PKG)/InterpreterException.class
+																			$(PKG)/CoreError*.class
+
 clean:
 	$(RM) $(PKG)/*.class *.jar
