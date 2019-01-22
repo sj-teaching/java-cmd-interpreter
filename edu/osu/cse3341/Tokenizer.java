@@ -230,7 +230,7 @@ public class Tokenizer {
 	}
 
 	public static void main(String[] args) {
-		log = Logger.getLogger("Main");
+		log = Logger.getLogger("Tokenizer");
 		log.setLevel(Level.SEVERE);
 		log.fine("Logger created");
 
@@ -238,7 +238,7 @@ public class Tokenizer {
 		if (args.length != 1) {
 			String msg = "Invalid number of arguments\nUsage: java -jar <jar file> <test file>\n";
 			log.severe(msg);
-			System.exit(args.length);
+			System.exit(1);
 		}
 
 		Tokenizer t = new Tokenizer();
