@@ -212,7 +212,7 @@ public class Tokenizer {
 
 	private void raiseError(String msg) throws CoreError.InvalidTokenException {
 		String excMsg = "Invalid Token: [Line " + line + "] " + msg;
-		log.info(excMsg);
+		// log.info(excMsg);
 		throw new CoreError.InvalidTokenException(excMsg);
 	}
 
