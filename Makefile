@@ -14,17 +14,8 @@ default: classes
 
 classes: $(CLASSES:.java=.class)
 
-tokenizer: classes MANIFEST1.MF
-	jar cmvf MANIFEST1.MF Tokenizer.jar $(PKG)/Token*.class $(PKG)/CoreError*.class
-
-parser: classes MANIFEST2.MF
-	jar cmvf MANIFEST2.MF Parser.jar $(PKG)/Token*.class $(PKG)/CoreError*.class \
-																			$(PKG)/Parser*.class										 \
-																			$(PKG)/ParseTree*.class									 \
-																			$(PKG)/SymbolTable*.class
-
-interpreter: classes MANIFEST3.MF
-	jar cmvf MANIFEST3.MF Interpreter.jar $(PKG)/*.class
+jar: classes MANIFEST.MF
+jar cmvf MANIFEST.MF Core.jar $(PKG)/*.class
 
 clean:
 	$(RM) $(PKG)/*.class *.jar
