@@ -23,5 +23,8 @@ parser: classes MANIFEST2.MF
 																			$(PKG)/ParseTree*.class									 \
 																			$(PKG)/SymbolTable*.class
 
+interpreter: classes MANIFEST3.MF
+	jar cmvf MANIFEST3.MF Interpreter.jar $(PKG)/*.class
+
 clean:
 	$(RM) $(PKG)/*.class *.jar
