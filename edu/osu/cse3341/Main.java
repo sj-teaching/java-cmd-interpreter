@@ -26,7 +26,7 @@ public class Main {
         log.info("Arguments: " + Arrays.toString(args));
 
         String msg = "Invalid number of arguments\n"
-            + "Usage: java -jar core.jar <option> <test-file>\n"
+            + "Usage: java -jar Core.jar <option> <test-file>\n"
             + "where\n"
             + "\t<option> includes\n"
             + "\t\t-t\tRun tokenizer only\n"
@@ -53,7 +53,7 @@ public class Main {
                 ParseTree pt = Parser.parse(testFile);
                 Parser.print(pt);
             } else if (option.equals("-i")) {
-                ParseTree pt = Parser.parse(args[0]);
+                ParseTree pt = Parser.parse(testFile);
                 Interpreter.execProg(pt);
             } else {
                 throw new CoreError.InvalidCmdLineArgsException(msg);

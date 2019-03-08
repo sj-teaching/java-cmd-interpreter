@@ -15,7 +15,7 @@ default: classes
 classes: $(CLASSES:.java=.class)
 
 jar: classes MANIFEST.MF
-jar cmvf MANIFEST.MF Core.jar $(PKG)/*.class
+	jar cmvf MANIFEST.MF Core.jar $(PKG)/*.class
 
 clean:
 	$(RM) $(PKG)/*.class *.jar
